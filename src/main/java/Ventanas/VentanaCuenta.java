@@ -43,7 +43,7 @@ import javax.swing.border.BevelBorder;
 
 /**
  *
- * @author vale2
+ * @author diego
  */
 public class VentanaCuenta extends FrameManager{
     

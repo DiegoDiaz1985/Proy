@@ -22,8 +22,10 @@ import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.ArrayList;
+import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
+import javax.swing.ImageIcon;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -37,36 +39,42 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 
+/**
+ *
+ * @author diego
+ */
+
 public class VentanaMisAutos extends FrameManager{
     private String[] nombreColumnas;
     final AutoDB autos = new AutoDB();
     private int idAuto;
     private Auto auto;
-    private JComboBox comboListaAutos;
     private JTextField textMarca;
     private JTextField textModelo;
-    private JTextField textColor;
+    private JComboBox comboColor;
     private JComboBox comboCombustible;
-    private JTextField textCombustible;
     private JTextField textPatente;
     private JComboBox comboAire;
-    private JTextField textAire;
     private JComboBox comboCalefaccion;
     private JTextField textCantAsientos;
-    private JComboBox comboCalificacion;
     private JComboBox comboBaul;
-    private JTextField textCalefaccion;
-    private JTextField textCantidad;
-    private JTextField textBaul;
-    private JTextField textCalificacion;
-    private int aux;
+    private JComboBox comboCalificacion;
+    private ImageIcon imagen;
+        
     
-  
+    
+    
+    /*
+    Esta ventana mostrara el listado de autos que tengo
+    y la posibilidad de agregar, editar y eliminar un auto
+    */
+    
+   
     
     public VentanaMisAutos(Usuario u){
         java.util.Locale.setDefault(java.util.Locale.forLanguageTag("es-AR"));
         VentanaMisAutos self = this;
-      
+        JLabel img = new JLabel();    
         final String[] nombreColumnas = {"id","Marca","Modelo","Color","Combustible","Patente","Aire","Calefacción","Cantidad de asientos","Calificación","Baul"};       
         final DefaultTableModel modTabla = new DefaultTableModel(){
             @Override
@@ -76,6 +84,31 @@ public class VentanaMisAutos extends FrameManager{
             }
             
         };
+        JTable tablaAutos = new JTable(modTabla);
+        ArrayList <Auto> arrAutos = new ArrayList<>(); 
+        arrAutos=autos.ObtenerAutosUsuario(u.getId_usuario());
+        modTabla.setDataVector(cargarTabla(arrAutos),nombreColumnas);
+             //------------oculto la primer columna del id-------------------------ale
+        tablaAutos.getColumnModel().getColumn(0).setMaxWidth(0);
+        tablaAutos.getColumnModel().getColumn(0).setMinWidth(0);
+        tablaAutos.getColumnModel().getColumn(0).setPreferredWidth(0);
+        tablaAutos.setPreferredScrollableViewportSize(new Dimension(650, 200));
+        
+        tablaAutos.setAutoResizeMode (JTable.AUTO_RESIZE_OFF); 
+        TableColumn col;
+        int ancho;
+        DefaultTableCellRenderer dtcr = new DefaultTableCellRenderer();
+        dtcr.setHorizontalAlignment(SwingConstants.LEFT);
+        // --- columna 1   
+        col = tablaAutos.getColumnModel ().getColumn(1);
+        ancho = 100;  
+        col.setPreferredWidth (ancho);
+        tablaAutos.getColumnModel().getColumn(1).setCellRenderer(dtcr);    
+        // --- columna 2  
+        col = tablaAutos.getColumnModel ().getColumn(2);
+        ancho = 160;  
+        col.setPreferredWidth (ancho);
+        tablaAutos.getColumnModel().getColumn(2).setCellRenderer(dtcr);    
         
         
         JPanel panelListar = new JPanel();
@@ -87,63 +120,16 @@ public class VentanaMisAutos extends FrameManager{
         borde.setTitleFont(new Font("Arial",3,22));
         panelListar.setBorder(borde);
         
+        GridBagConstraints gRes3 = new GridBagConstraints ();
+        gRes3.gridx=0;
+        gRes3.gridy=1;
+        gRes3.weightx=1;
+        gRes3.weighty=1;
+        //gRes3.anchor = GridBagConstraints.NORTH;
+        gRes3.fill = GridBagConstraints.BOTH;
+        gRes3.insets = new Insets(20,0,0,0);
+        panelListar.add(new JScrollPane(tablaAutos),gRes3);
         
-        JTable tablaAutos = new JTable(modTabla);
-        ArrayList <Auto> arrAutos = new ArrayList<>(); 
-        arrAutos=autos.ObtenerAutosUsuario(u.getId_usuario());
-        
-        if (arrAutos.size()> 0){
-                modTabla.setDataVector(cargarTabla(arrAutos),nombreColumnas);
-                     //------------oculto la primer columna del id-------------------------ale
-                tablaAutos.getColumnModel().getColumn(0).setMaxWidth(0);
-                tablaAutos.getColumnModel().getColumn(0).setMinWidth(0);
-                tablaAutos.getColumnModel().getColumn(0).setPreferredWidth(0);
-                tablaAutos.setPreferredScrollableViewportSize(new Dimension(650, 200));
-
-               tablaAutos.setAutoResizeMode (JTable.AUTO_RESIZE_OFF); 
-                TableColumn col;
-                int ancho;
-                DefaultTableCellRenderer dtcr = new DefaultTableCellRenderer();
-                dtcr.setHorizontalAlignment(SwingConstants.LEFT);
-                tablaAutos.setRowHeight(18);
-
-                // --- columna 1   
-                col = tablaAutos.getColumnModel ().getColumn(1);
-                ancho = 100;  
-                col.setPreferredWidth (ancho);
-                tablaAutos.getColumnModel().getColumn(1).setCellRenderer(dtcr);    
-                // --- columna 2  
-                col = tablaAutos.getColumnModel ().getColumn(2);
-                ancho = 180;  
-                col.setPreferredWidth (ancho);
-                tablaAutos.getColumnModel().getColumn(2).setCellRenderer(dtcr);    
-        
-               // GridBagConstraints gRes = new GridBagConstraints ();
-                gRes.gridx=0;
-                gRes.gridy=1;
-                gRes.weightx=1;
-                gRes.weighty=1;
-                //gRes3.anchor = GridBagConstraints.NORTH;
-                gRes.fill = GridBagConstraints.BOTH;
-                gRes.insets = new Insets(20,0,0,0);
-                panelListar.add(new JScrollPane(tablaAutos),gRes);
-        }
-        else{
-                
-                 JLabel labelNoAutos=new JLabel(" NO TIENE AUTOS REGISTRADOS");
-                labelNoAutos.setHorizontalAlignment(JLabel.LEFT);
-                gRes.gridx=0;
-                gRes.gridy=0;
-                gRes.gridwidth=1;
-                //resa1.anchor = GridBagConstraints.EAST;
-                gRes.fill = GridBagConstraints.HORIZONTAL;
-                gRes.insets = new Insets(10,0,10,0);
-                panelListar.add(labelNoAutos,gRes);
-                
-                
-         }       
-                
-
         JPanel panelBotones = new JPanel();
         panelBotones.setLayout(new BoxLayout(panelBotones, BoxLayout.Y_AXIS));
         //panelBotones.setBackground(Color.WHITE);
@@ -151,17 +137,34 @@ public class VentanaMisAutos extends FrameManager{
         botonAgregarAuto.setAlignmentX (panelBotones.CENTER_ALIGNMENT);
         panelBotones.add(botonAgregarAuto);
         panelBotones.add (Box.createRigidArea (new Dimension (15,15)));
-   
+       // Boton botonEditarAuto=new Boton("Actualizar Datos");
+       // botonEditarAuto.setAlignmentX (panelBotones.CENTER_ALIGNMENT);
+        //panelBotones.add(botonEditarAuto);
+        // panelBotones.add (Box.createRigidArea (new Dimension (15,15)));
         Boton botonEliminarAuto=new Boton("Eliminar Auto");
         botonEliminarAuto.setAlignmentX (panelBotones.CENTER_ALIGNMENT);
         panelBotones.add(botonEliminarAuto);
-    
+       // Boton botonVolver=new Boton("Volver");
+      //  panelBotones.add(botonVolver);
 
-
+// panel inferior
+        
+        JPanel panelInferior = new JPanel();
+        //panelBotones.setLayout(new BoxLayout(panelBotones, BoxLayout.Y_AXIS));
+        panelInferior.setLayout(new FlowLayout(FlowLayout.CENTER, 100,0));
+        Boton botonActualizar=new Boton("Actualizar");
+       // botonEditarAuto.setAlignmentX (panelBotones.CENTER_ALIGNMENT);
+        panelInferior.add(botonActualizar);
+        Boton botonVolver=new Boton("Volver");
+       // botonVolver.setAlignmentX (panelInferior.CENTER_ALIGNMENT);
+        panelInferior.add(botonVolver);
+       // panelInferior.add (Box.createRigidArea (new Dimension (15,15)));
       
         
          //-----------------datos del auto---------------------------------------
-
+       
+       
+        
         
         
         JPanel panelDetalleAuto1 = new JPanel();
@@ -175,12 +178,10 @@ public class VentanaMisAutos extends FrameManager{
         resa1.gridx=0;
         resa1.gridy=0;
         resa1.gridwidth=1;
-        //resa1.anchor = GridBagConstraints.EAST;
         resa1.fill = GridBagConstraints.HORIZONTAL;
         resa1.insets = new Insets(10,0,10,0);
         panelDetalleAuto1.add(labelMarca,resa1);
         textMarca=new JTextField("                                              ");
-      //  textMarca.setHorizontalAlignment(JTextField.LEFT);
         resa1.gridx=1;
         resa1.gridy=0;
         resa1.gridwidth= GridBagConstraints.REMAINDER;
@@ -201,42 +202,45 @@ public class VentanaMisAutos extends FrameManager{
         resa1.gridwidth=GridBagConstraints.REMAINDER;
         resa1.insets = new Insets(10,0,10,0);
         panelDetalleAuto1.add(textModelo,resa1);
-       
-        JLabel labelColor=new JLabel("Color: ");
-        labelColor.setHorizontalAlignment(JLabel.LEFT);
+        
+        JLabel labelPatente=new JLabel("Patente: ");
+        labelPatente.setHorizontalAlignment(JLabel.LEFT);
         resa1.gridx=0;
         resa1.gridy=2;
         resa1.gridwidth=1;
         resa1.insets = new Insets(10,0,10,0);
-        panelDetalleAuto1.add(labelColor,resa1);
-        textColor=new JTextField("");
+        panelDetalleAuto1.add(labelPatente,resa1);
+        textPatente=new JTextField("");
         resa1.gridx=1;
         resa1.gridy=2;
+        resa1.gridwidth=GridBagConstraints.REMAINDER;
+        resa1.insets = new Insets(10,0,10,0);
+        panelDetalleAuto1.add(textPatente,resa1);
+       
+        JLabel labelColor=new JLabel("Color: ");
+        labelColor.setHorizontalAlignment(JLabel.LEFT);
+        resa1.gridx=0;
+        resa1.gridy=3;
+        resa1.gridwidth=1;
+        resa1.insets = new Insets(10,0,10,0);
+        panelDetalleAuto1.add(labelColor,resa1);
+        comboColor = new JComboBox();
+        comboColor.addItem("AMARILLO");
+        comboColor.addItem("AZUL");
+        comboColor.addItem("BLANCO");
+        comboColor.addItem("CELESTE");
+        comboColor.addItem("MARRON");
+        comboColor.addItem("NEGRO");
+        comboColor.addItem("ROSA");
+        comboColor.addItem("ROJO");
+        comboColor.addItem("VERDE");
+        comboColor.addItem("OTRO");
+        resa1.gridx=1;
+        resa1.gridy=3;
         //resa1.gridwidth=1;
         resa1.insets = new Insets(10,0,10,0);
-        panelDetalleAuto1.add(textColor,resa1);
-       
-        
-         //PATENTE--------------------
-        JLabel laPatente = new JLabel("Patente:");  
-        laPatente.setFont(new Font("arial",3,12));
-        laPatente.setForeground(Color.BLACK);
-        laPatente.setHorizontalAlignment(JLabel.LEFT);
-         resa1.gridx = 0;
-         resa1.gridy = 3;
-         resa1.gridwidth =1;
-         resa1.insets = new Insets(10,0,10,0);
-        panelDetalleAuto1.add(laPatente, resa1);
-        textPatente = new JTextField(" ");
-        //textPatente.setColumns(25);
-         resa1.gridx = 1;
-         resa1.gridy = 3;
-         resa1.gridwidth =1;
-         resa1.insets = new Insets(10,0,10,0);
-        panelDetalleAuto1.add(textPatente,resa1);
-        
-        
-        
+        panelDetalleAuto1.add(comboColor,resa1);
+               
         
         JLabel labelCombustible=new JLabel("Combustible: ");
         labelCombustible.setHorizontalAlignment(JLabel.LEFT);
@@ -245,12 +249,15 @@ public class VentanaMisAutos extends FrameManager{
         resa1.gridwidth=1;
         resa1.insets = new Insets(10,0,10,0);
         panelDetalleAuto1.add(labelCombustible,resa1);
-        textCombustible=new JTextField("             ");
+        comboCombustible = new JComboBox();
+        comboCombustible.addItem("NAFTA");
+        comboCombustible.addItem("DIESEL");
+        comboCombustible.addItem("GAS");
         resa1.gridx=1;
         resa1.gridy=4;
        // resa1.gridwidth=1;
         resa1.insets = new Insets(10,0,10,0);
-        panelDetalleAuto1.add(textCombustible,resa1);
+        panelDetalleAuto1.add(comboCombustible,resa1);
         
        
         JPanel panelDetalleAuto2 = new JPanel();
@@ -258,9 +265,13 @@ public class VentanaMisAutos extends FrameManager{
         GridBagConstraints resa2 = new GridBagConstraints ();
         panelDetalleAuto2.setLayout(gBaga2);
         panelDetalleAuto2.setBackground(Color.WHITE);
-    
+        //TitledBorder borde3 = new TitledBorder("");
+        //borde3.setTitleFont(new Font("Arial",3,14));
+       // panelDetalleAuto2.setBorder(borde3);
         
-        JLabel labelAire=new JLabel("Aire acondicionado:");
+        
+        
+        JLabel labelAire=new JLabel(" Aire acondicionado:");
         labelAire.setHorizontalAlignment(JLabel.LEFT);
         resa2.gridx=0;
         resa2.gridy=0;
@@ -269,32 +280,34 @@ public class VentanaMisAutos extends FrameManager{
         resa2.fill = GridBagConstraints.HORIZONTAL;
         resa2.insets = new Insets(10,0,10,0);
         panelDetalleAuto2.add(labelAire,resa2);
-       
-        textAire=new JTextField("               ");
+        comboAire = new JComboBox();
+        comboAire.addItem("Si");
+        comboAire.addItem("No");
         resa2.gridx=1;
         resa2.gridy=0;
         resa2.gridwidth=GridBagConstraints.REMAINDER;
         resa2.insets = new Insets(10,0,10,0);
-        panelDetalleAuto2.add(textAire,resa2);
+        panelDetalleAuto2.add(comboAire,resa2);
         
         
-        JLabel labelCalefaccion=new JLabel("Calefaccion:");
+        JLabel labelCalefaccion=new JLabel(" Calefaccion:");
         labelCalefaccion.setHorizontalAlignment(JLabel.LEFT);
         resa2.gridx=0;
         resa2.gridy=1;
         resa2.gridwidth=1;
         resa2.insets = new Insets(10,0,10,0);
         panelDetalleAuto2.add(labelCalefaccion,resa2);
-      
-        textCalefaccion=new JTextField("             ");
+        comboCalefaccion = new JComboBox();
+        comboCalefaccion.addItem("Si");
+        comboCalefaccion.addItem("No");
         resa2.gridx=1;
         resa2.gridy=1;
         resa2.gridwidth=GridBagConstraints.REMAINDER;;
         resa2.insets = new Insets(10,0,10,0);
-        panelDetalleAuto2.add(textCalefaccion,resa2);
+        panelDetalleAuto2.add(comboCalefaccion,resa2);
        
         
-        JLabel labelCantidad=new JLabel("Cantidad de Asientos: ");
+        JLabel labelCantidad=new JLabel(" Cantidad de Asientos: ");
         labelCantidad.setHorizontalAlignment(JLabel.LEFT);
         resa2.gridx=0;
         resa2.gridy=2;
@@ -308,45 +321,42 @@ public class VentanaMisAutos extends FrameManager{
         resa2.insets = new Insets(10,0,10,0);
         panelDetalleAuto2.add(textCantAsientos,resa2);
         
-        JLabel labelBaul=new JLabel("Capacidad Baul: ");
+        JLabel labelBaul=new JLabel(" Capacidad del Baul: ");
         labelBaul.setHorizontalAlignment(JLabel.LEFT);
         resa2.gridx=0;
         resa2.gridy=3;
         resa2.gridwidth=1;
         resa2.insets = new Insets(10,0,10,0);
         panelDetalleAuto2.add(labelBaul,resa2);
-        textBaul=new JTextField("                      ");
+        comboBaul = new JComboBox();
+        comboBaul.addItem("CHICO");
+        comboBaul.addItem("MEDIANO");
+        comboBaul.addItem("GRANDE");
         resa2.gridx=1;
         resa2.gridy=3;
         resa2.gridwidth=GridBagConstraints.REMAINDER;
         resa2.insets = new Insets(10,0,10,0);
-        panelDetalleAuto2.add(textBaul,resa2);
+        panelDetalleAuto2.add(comboBaul,resa2);
         
-        JLabel labelCalificacion=new JLabel("Calificacion: ");
-        labelCalificacion.setHorizontalAlignment(JLabel.CENTER);
+        JLabel labelCalificacion=new JLabel(" Calificacion: ");
+        labelCalificacion.setHorizontalAlignment(JLabel.LEFT);
         resa2.gridx=0;
         resa2.gridy=4;
         resa2.gridwidth=1;
         resa2.insets = new Insets(10,0,10,0);
         panelDetalleAuto2.add(labelCalificacion,resa2);
-        textCalificacion=new JTextField("                 ");
+        comboCalificacion = new JComboBox();
+        for (int i=0;i<10;i++){
+            comboCalificacion.addItem(i+1);
+        }
         resa2.gridx=1;
         resa2.gridy=4;
         resa2.gridwidth=GridBagConstraints.REMAINDER;
         resa2.insets = new Insets(10,0,10,0);
-        panelDetalleAuto2.add(textCalificacion,resa2);
-     
+        panelDetalleAuto2.add(comboCalificacion,resa2);
+         
         
-      /*  JPanel panelDetalleAuto3 = new JPanel();
-        panelDetalleAuto3.setLayout(new FlowLayout(FlowLayout.CENTER, 100,0));
-        panelDetalleAuto3.setBackground(Color.WHITE);
-        JLabel labelCalificacion=new JLabel("Calificacion: ");
-        labelCalificacion.setHorizontalAlignment(JLabel.CENTER);
-        
-        panelDetalleAuto3.add(labelCalificacion);
-        textCalificacion=new JTextField("                 ");
-        panelDetalleAuto3.add(textCalificacion);*/
-        
+           
         
         
         
@@ -363,29 +373,25 @@ public class VentanaMisAutos extends FrameManager{
         res2.gridx=0;
         res2.gridy=0;
         res2.gridwidth=GridBagConstraints.RELATIVE;
-   
         res2.anchor = GridBagConstraints.WEST;
         res2.fill = GridBagConstraints.BOTH;
-        res2.insets = new Insets(0,0,0,0);
+        res2.insets = new Insets(10,10,10,10);
         panelDetalleAuto.add(panelDetalleAuto1,res2);
-       
         res2.gridx=1;
         res2.gridy=0;
         res2.gridwidth=GridBagConstraints.RELATIVE;
-      
-       res2.anchor = GridBagConstraints.EAST;
+        res2.anchor = GridBagConstraints.EAST;
         res2.fill = GridBagConstraints.BOTH;
-        res2.insets = new Insets(0,0,0,0);
-       panelDetalleAuto.add(panelDetalleAuto2,res2);
-        
-       
+        res2.insets = new Insets(10,10,10,10);
+        panelDetalleAuto.add(panelDetalleAuto2,res2);
+        JPanel panelFoto = new JPanel();
         res2.gridx=0;
-        res2.gridy=2;
+        res2.gridy=0;
         res2.gridwidth=GridBagConstraints.RELATIVE;
- 
+        res2.anchor = GridBagConstraints.EAST;
         res2.fill = GridBagConstraints.BOTH;
-        res2.insets = new Insets(10,0,0,0);
-       //panelDetalleAuto.add(panelDetalleAuto3,res2);
+        res2.insets = new Insets(10,10,10,10);
+        imagen = new ImageIcon(getClass().getResource("/auto1.jpg"));
         
         
         tablaAutos.addMouseListener(new MouseAdapter(){
@@ -397,85 +403,75 @@ public class VentanaMisAutos extends FrameManager{
                 //tablaViajes.getSelectedRows()
                 String id=String.valueOf(tablaAutos.getValueAt(tablaAutos.getSelectedRow(), 0));
                 idAuto=Integer.parseInt(id);
-                System.out.println("Auto"+idAuto);
+                
                 auto=a.ObtenerDatosAuto(idAuto);
-               
                 textMarca.setText(auto.getMarca());
                 textModelo.setText(auto.getModelo());
-                textColor.setText(auto.getColor());
                 textPatente.setText(auto.getPatente());
-                textCombustible.setText(auto.getCombustible());
-                String aire=String.valueOf(auto.isAire_acondicionado());
-                if (aire.equals("true")){
-                    aire="Si";
+                textCantAsientos.setText(String.valueOf((int)auto.getCantidad_de_asientos()));
+                if(auto.getAire_acondicionado())
+                    comboAire.setSelectedIndex(0);
+                else
+                    comboAire.setSelectedIndex(1);
+                if(auto.getCalefaccion())
+                    comboCalefaccion.setSelectedIndex(0);
+                else
+                    comboCalefaccion.setSelectedIndex(1);
+                
+                for (int j=0;j<10;j++){
+                    if (auto.getCalificacion()==Short.parseShort(comboCalificacion.getItemAt(j).toString()))
+                        comboCalificacion.setSelectedIndex(j);   
                 }
-                else{
-                    aire="No";
+                               
+                for (int j=0;j<10;j++){
+                    if (auto.getColor().equals(comboColor.getItemAt(j).toString()))
+                        comboColor.setSelectedIndex(j);   
                 }
-                textAire.setText(aire);
-                String calefa=String.valueOf(auto.isCalefaccion());
-                if (calefa.equals("true")){
-                    calefa="Si";
-                }
-                else{
-                    calefa="No";
+                               
+                for (int j=0;j<3;j++){
+                    if (auto.getCombustible().equals(comboCombustible.getItemAt(j).toString()))
+                        comboCombustible.setSelectedIndex(j);   
                 }
                 
-                textCalefaccion.setText(calefa);
-                textCantAsientos.setText(String.valueOf(auto.getCantidad_de_asientos()));
-                textBaul.setText(auto.getCapacidad_baul());
-                textCalificacion.setText(String.valueOf(auto.getCalificacion()));
+                         
+                for (int j=0;j<3;j++){
+                    if (auto.getCapacidad_baul().equals(comboBaul.getItemAt(j).toString()))
+                        comboBaul.setSelectedIndex(j);   
+                } 
+                               
+                if (!(auto.getFoto()).equals(" ")&&(imagen==null))
+                    imagen = new ImageIcon(getClass().getResource(auto.getFoto()));
+                JLabel img = new JLabel();
+                img.setIcon(imagen);
+                resa2.gridx=0;
+                resa2.gridy=0;
+                resa2.gridwidth=GridBagConstraints.REMAINDER;
+                resa2.insets = new Insets(10,10,10,10);
+                panelFoto.add(img,resa2);
+        
                 
              }
                
                
         });
         
-         
-         // panel inferior
-        
-        JPanel panelInferior = new JPanel();
-        panelInferior.setLayout(new FlowLayout(FlowLayout.CENTER, 50,0));
-        Boton botonActualizar=new Boton("Actualizar");
-        panelInferior.add(botonActualizar);
-        Boton botonVolver=new Boton("Volver");
-        panelInferior.add(botonVolver);
-            
-        botonActualizar.addMouseListener(new MouseAdapter() { 
+        img.addMouseListener(new MouseAdapter() { 
             
             @Override
-            public void mouseClicked(MouseEvent e) {
-               
-                String marca=textMarca.getText();
-                String modelo=textModelo.getText();
-                String color=textColor.getText();
-                String combustible=textCombustible.getText();
-             
-                String patente=textPatente.getText();
-                String aire;
-                String calefaccion;
-                String cantAsientos=textCantAsientos.getText();
-           
-                String calificacion=textCalificacion.getText();;
-                String baul=textBaul.getText();
-                //String foto=" ";//falta asignar la foto
-                if (textAire.equals("Si"))
-                    aire="1";
-                else
-                    aire="0";
-                if (textCalefaccion.equals("Si"))
-                    calefaccion="1";
-                else
-                    calefaccion="0";
-                
-               AutoDB adb=new AutoDB();  
-               adb.updateCar(marca, modelo, color, combustible, patente, aire, calefaccion, cantAsientos, calificacion, baul,idAuto);
-                //adb.updateCar(marca, modelo, color, combustible, patente, aire, calefaccion, cantAsientos, calificacion, baul, arrAutos.get(aux).getId_auto());
-                JOptionPane.showMessageDialog(self,"El auto se ha actualizado satisfactoriamente");
-               
-                
+            public void mouseEntered(MouseEvent e) {
+               img.setBorder(BorderFactory.createLineBorder(Color.ORANGE, 3));
+               img.setToolTipText("click para cambiar foto");
             }
-        });
+            
+            @Override
+            public void mouseExited(MouseEvent e) {
+              
+                img.setBorder(BorderFactory.createEmptyBorder(2,2,2,2));
+            }
+            
+            
+        }); 
+         
          
         
         
@@ -503,7 +499,36 @@ public class VentanaMisAutos extends FrameManager{
             }
         });
         
-      
+        botonActualizar.addMouseListener(new MouseAdapter() { 
+            
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                String marca=textMarca.getText();
+                String modelo=textModelo.getText();
+                String color=String.valueOf(comboColor.getSelectedItem());
+                String combustible=String.valueOf(comboCombustible.getSelectedItem());
+                String patente=textPatente.getText();
+                String aire=String.valueOf(comboAire.getSelectedItem());
+                String calefaccion=String.valueOf(comboCalefaccion.getSelectedItem());
+                String cantAsientos=textCantAsientos.getText();
+                String calificacion=String.valueOf(comboCalificacion.getSelectedItem());
+                String baul=String.valueOf(comboBaul.getSelectedItem());
+                String foto=" ";//falta asignar la foto
+                if (comboAire.getSelectedItem().toString()=="Si")
+                    aire="0";
+                else
+                    aire="1";
+                if (comboCalefaccion.getSelectedItem().toString()=="Si")
+                    calefaccion="0";
+                else
+                    calefaccion="1";
+                autos.updateCar(marca, modelo, color, combustible, patente, aire, calefaccion, cantAsientos, calificacion, baul, foto,auto.getId_auto());
+                JOptionPane.showMessageDialog(self,"El auto se ha actualizado satisfactoriamente");
+                VentanaViajes viajes = new VentanaViajes(u);
+                viajes.setVisible(true);
+                self.setVisible(false);
+            }
+        });
         
         
         botonEliminarAuto.addMouseListener(new MouseAdapter() { 
@@ -511,22 +536,46 @@ public class VentanaMisAutos extends FrameManager{
             @Override
             public void mouseClicked(MouseEvent e) {
                 
+                ViajeDB viajes = new ViajeDB();
+                //pregunto hay viajes con este auto en el futuro??
+                if (viajes.existeAutoEnViajePendiente(auto.getId_auto()))
+                        JOptionPane.showMessageDialog(self,"Su auto no puede ser eliminado, debe eliminar algun viaje pendiente en el que se encuentra el auto");
+                    else
+                    {
+                        autos.deleteCar(auto.getId_auto());
+                        JOptionPane.showMessageDialog(self,"Su auto a sido eliminado");
+                    }
+                VentanaMisAutos au = new VentanaMisAutos(u);
+                au.setVisible(true);
+                self.setVisible(false);
                 
-                ViajeDB v = new ViajeDB();
-                v.tieneViajesPendientes(idAuto);
-                AutoDB adb = new AutoDB();
-                if ( v.tieneViajesPendientes(idAuto)){
-                    JOptionPane.showMessageDialog(null, "El auto tiene viajes pendientes", "Acción no válida", JOptionPane.WARNING_MESSAGE);
-                }
-                else {
-                    adb.deleteCar(idAuto);
-                    JOptionPane.showMessageDialog(self,"El auto ha sido eliminado");
-                    VentanaMisAutos va = new VentanaMisAutos(u);
-                    va.setVisible(true);
-                    self.setVisible(false);
+            }
+        });
+        
+        
+        Boton botonRegistrarFoto=new Boton("Agregar Foto");
+        gRes3.gridx =0;
+        gRes3.gridy =1;
+        gRes3.gridwidth =1;
+        gRes3.gridheight =0;
+        gRes3.weightx = 1.0;
+        gRes3.weighty = 1.0;
+        gRes3.anchor = GridBagConstraints.CENTER;
+        gRes3.fill = GridBagConstraints.NONE;
+        gRes3.insets = new Insets(0,0,0,30);
+        panelFoto.add(botonRegistrarFoto,gRes3);
+        
+        
+        botonRegistrarFoto.addMouseListener(new MouseAdapter() { 
+            
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                JOptionPane.showMessageDialog(self,"En un futuro se podra agregar la foto");
+                VentanaMisAutos va = new VentanaMisAutos(u);
+                va.setVisible(true);
+                self.setVisible(false);
                 
-                }
-            }    
+            }
         });
         
         //----Listar Autos
@@ -566,7 +615,18 @@ public class VentanaMisAutos extends FrameManager{
         res.fill = GridBagConstraints.BOTH;
         res.insets = new Insets(0,50,0,0);
         this.add(panelDetalleAuto,res);
-   
+        
+        // panel foto
+        res.gridx=1;
+        res.gridy=2;
+        res.gridwidth=GridBagConstraints.RELATIVE;
+        //res.gridheight=GridBagConstraints.RELATIVE;
+        //res.weightx=1;
+        //res.weighty=1;
+        //res.anchor = GridBagConstraints.NORTH;
+        res.fill = GridBagConstraints.BOTH;
+        res.insets = new Insets(20,0,0,0);
+        this.add(panelFoto,res);
 
         // panel inferior
         res.gridx=0;
@@ -588,10 +648,10 @@ public class VentanaMisAutos extends FrameManager{
      public Object[][] cargarTabla(ArrayList<Auto> arrAutos){
         
         int max= arrAutos.size();
-        Object[][] datos= new Object[max+3][11];    
+        Object[][] datos= new Object[max][11];    
         int i=0;
         for(Auto vAux : arrAutos){
-            if(vAux.isCuenta())    
+            if(vAux.getCuenta())    
             {
                datos[i][0]=vAux.getId_auto();
                datos[i][1]=vAux.getMarca();
@@ -599,11 +659,11 @@ public class VentanaMisAutos extends FrameManager{
                datos[i][3]=vAux.getColor();
                datos[i][4]=vAux.getCombustible();
                datos[i][5]=vAux.getPatente();
-               if (vAux.isAire_acondicionado())
+               if (vAux.getAire_acondicionado())
                    datos[i][6]="Si";
                else
                    datos[i][6]="No";
-               if (vAux.isCalefaccion())
+               if (vAux.getCalefaccion())
                    datos[i][7]="Si";
                else
                    datos[i][7]="No";
